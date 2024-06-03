@@ -119,7 +119,7 @@ made by our beloved Shay Malichi.
 >   beacon-chain: # or validator
 >      image: "gcr.io/prysmaticlabs/prysm/beacon-chain:stable" # change image version only 
 >      command:
->       - --enable-lightclient  # add this flag onlt to beacon-chain
+>       - --enable-lightclient  # add this flag only to beacon-chain
 > ```
 
   
