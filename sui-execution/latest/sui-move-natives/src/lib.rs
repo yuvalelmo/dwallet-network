@@ -58,7 +58,8 @@ use sui_types::{MOVE_STDLIB_ADDRESS, SUI_FRAMEWORK_ADDRESS, SUI_SYSTEM_ADDRESS};
 use transfer::TransferReceiveObjectInternalCostParams;
 use crate::crypto::twopc_mpc::TwoPCMPCDKGCostParams;
 use crate::crypto::sui_state_proof::SuiStateProofCostParams;
-
+use crate::crypto::eth_state_proof::EthDWalletCostParams;
+use crate::crypto::eth_state_proof;
 
 mod address;
 mod crypto;
@@ -153,6 +154,9 @@ pub struct NativesCostTable {
 
     // twopc mpc
     pub twopc_mpc_dkg_cost_params: TwoPCMPCDKGCostParams,
+
+    // eth state proof
+    pub eth_state_proof: EthDWalletCostParams,
 
     // sui state proof
     pub sui_state_proof_cost_params: SuiStateProofCostParams,
@@ -463,26 +467,26 @@ impl NativesCostTable {
                     .into(),
             },
             groth16_verify_groth16_proof_internal_cost_params:
-                Groth16VerifyGroth16ProofInternalCostParams {
-                    groth16_verify_groth16_proof_internal_bls12381_cost_base: protocol_config
-                        .groth16_verify_groth16_proof_internal_bls12381_cost_base()
-                        .into(),
-                    groth16_verify_groth16_proof_internal_bls12381_cost_per_public_input:
-                        protocol_config
-                            .groth16_verify_groth16_proof_internal_bls12381_cost_per_public_input()
-                            .into(),
-                    groth16_verify_groth16_proof_internal_bn254_cost_base: protocol_config
-                        .groth16_verify_groth16_proof_internal_bn254_cost_base()
-                        .into(),
-                    groth16_verify_groth16_proof_internal_bn254_cost_per_public_input:
-                        protocol_config
-                            .groth16_verify_groth16_proof_internal_bn254_cost_per_public_input()
-                            .into(),
-                    groth16_verify_groth16_proof_internal_public_input_cost_per_byte:
-                        protocol_config
-                            .groth16_verify_groth16_proof_internal_public_input_cost_per_byte()
-                            .into(),
-                },
+            Groth16VerifyGroth16ProofInternalCostParams {
+                groth16_verify_groth16_proof_internal_bls12381_cost_base: protocol_config
+                    .groth16_verify_groth16_proof_internal_bls12381_cost_base()
+                    .into(),
+                groth16_verify_groth16_proof_internal_bls12381_cost_per_public_input:
+                protocol_config
+                    .groth16_verify_groth16_proof_internal_bls12381_cost_per_public_input()
+                    .into(),
+                groth16_verify_groth16_proof_internal_bn254_cost_base: protocol_config
+                    .groth16_verify_groth16_proof_internal_bn254_cost_base()
+                    .into(),
+                groth16_verify_groth16_proof_internal_bn254_cost_per_public_input:
+                protocol_config
+                    .groth16_verify_groth16_proof_internal_bn254_cost_per_public_input()
+                    .into(),
+                groth16_verify_groth16_proof_internal_public_input_cost_per_byte:
+                protocol_config
+                    .groth16_verify_groth16_proof_internal_public_input_cost_per_byte()
+                    .into(),
+            },
             hmac_hmac_sha3_256_cost_params: HmacHmacSha3256CostParams {
                 hmac_hmac_sha3_256_cost_base: protocol_config.hmac_hmac_sha3_256_cost_base().into(),
                 hmac_hmac_sha3_256_input_cost_per_byte: protocol_config
@@ -520,6 +524,17 @@ impl NativesCostTable {
                 sui_state_proof_verify_committee_cost_base: protocol_config.sui_state_proof_verify_committee_cost_base().into(),
                 sui_state_proof_verify_link_cap_base: protocol_config.sui_state_proof_verify_link_cap_base().into(),
                 sui_state_proof_verify_transaction_base: protocol_config.sui_state_proof_verify_transaction_base().into(),
+            },
+            eth_state_proof: EthDWalletCostParams {
+                verify_eth_state_cost_base: protocol_config
+                    .verify_eth_state_cost_base()
+                    .into(),
+                verify_message_proof_cost_base: protocol_config
+                    .verify_message_proof_cost_base()
+                    .into(),
+                create_initial_eth_state_data_cost_base: protocol_config
+                    .create_initial_eth_state_data_cost_base()
+                    .into(),
             },
         }
     }
@@ -749,7 +764,24 @@ pub fn all_natives(silent: bool) -> NativeFunctionTable {
         (
             "dwallet_2pc_mpc_ecdsa_k1",
             "dkg_verify_decommitment_and_proof_of_centralized_party_public_key_share",
-            make_native!(twopc_mpc::dkg_verify_decommitment_and_proof_of_centralized_party_public_key_share),
+            make_native!(
+                twopc_mpc::dkg_verify_decommitment_and_proof_of_centralized_party_public_key_share
+            ),
+        ),
+        (
+            "ethereum_state",
+            "verify_eth_state",
+            make_native!(eth_state_proof::verify_eth_state),
+        ),
+        (
+            "eth_dwallet",
+            "verify_message_proof",
+            make_native!(eth_state_proof::verify_message_proof),
+        ),
+        (
+            "ethereum_state",
+            "create_initial_eth_state_data",
+            make_native!(eth_state_proof::create_initial_eth_state_data),
         ),
         (
             "sui_state_proof",
@@ -766,11 +798,7 @@ pub fn all_natives(silent: bool) -> NativeFunctionTable {
             "sui_state_proof_verify_transaction",
             make_native!(sui_state_proof::sui_state_proof_verify_transaction),
         ),
-        (
-            "dwallet_2pc_mpc_ecdsa_k1",
-            "sign_verify_encrypted_signature_parts_prehash",
-            make_native!(twopc_mpc::sign_verify_encrypted_signature_parts_prehash),
-        )];
+        ];
     sui_system_natives
         .iter()
         .cloned()

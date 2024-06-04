@@ -1069,7 +1069,7 @@ pub fn generate_genesis_system_object(
         let coin_treasury = Argument::NestedResult(coin, 0);
         let coin_supply = Argument::NestedResult(coin, 1);
 
-        // Step 5: Run genesis.
+        // Step 6: Run genesis.
         // The first argument is the system state uid we got from step 1 and the second one is the SUI supply we
         // got from step 3.
         let mut arguments = vec![sui_system_state_uid, coin_treasury, coin_supply];

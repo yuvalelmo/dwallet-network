@@ -16,6 +16,7 @@ use std::io::{stderr, stdout, Write};
 use std::num::NonZeroUsize;
 use std::path::{Path, PathBuf};
 use std::{fs, io};
+use std::time::Duration;
 use sui_config::node::Genesis;
 use sui_config::p2p::SeedPeer;
 use sui_config::{
@@ -284,7 +285,7 @@ impl SuiCommand {
             } => {
                 let config_path = config.unwrap_or(sui_config_dir()?.join(SUI_CLIENT_CONFIG));
                 prompt_if_no_config(&config_path, accept_defaults).await?;
-                let mut context = WalletContext::new(&config_path, None, None).await?;
+                let mut context = WalletContext::new(&config_path, Some(Duration::new(60, 0)), None).await?;
                 if let Some(cmd) = cmd {
                     cmd.execute(&mut context).await?.print(!json);
                 } else {
@@ -546,6 +547,12 @@ async fn genesis(
         alias: "localnet".to_string(),
         rpc: format!("http://{}", fullnode_config.json_rpc_address),
         ws: None,
+        eth_execution_rpc: None,
+        eth_consensus_rpc: None,
+        eth_genesis_time: None,
+        eth_chain_id: None,
+        eth_genesis_validators_root: None,
+        state_object_id: None,
     });
     client_config.add_env(SuiEnv::devnet());
 
@@ -570,6 +577,12 @@ async fn prompt_if_no_config(
                 alias: "custom".to_string(),
                 rpc: v.into_string().unwrap(),
                 ws: None,
+                eth_execution_rpc: None,
+                eth_consensus_rpc: None,
+                eth_genesis_time: None,
+                eth_chain_id: None,
+                eth_genesis_validators_root: None,
+                state_object_id: None,
             }),
             None => {
                 if accept_defaults {
@@ -605,6 +618,12 @@ async fn prompt_if_no_config(
                             alias,
                             rpc: url,
                             ws: None,
+                            eth_execution_rpc: None,
+                            eth_consensus_rpc: None,
+                            eth_genesis_time: None,
+                            eth_chain_id: None,
+                            eth_genesis_validators_root: None,
+                            state_object_id: None,
                         }
                     })
                 } else {
